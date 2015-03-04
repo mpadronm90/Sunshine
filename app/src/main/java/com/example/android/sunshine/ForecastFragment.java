@@ -1,8 +1,11 @@
 package com.example.android.sunshine;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -58,12 +62,23 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchWeatherTask tasky = new FetchWeatherTask();
-
-            tasky.execute("03003");
+            updateWeather();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateWeather() {
+        FetchWeatherTask tasky = new FetchWeatherTask();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = pref.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        tasky.execute(location);
+    }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -74,14 +89,6 @@ public class ForecastFragment extends Fragment {
 
         // lista de parametros para mostrar
         ArrayList<String> listForecast = new ArrayList<String>();
-        listForecast.add("Today-Sunny-17/10");
-        listForecast.add("Tomorrow-Cloudy-15/09");
-        listForecast.add("Saturday-Foggy-16/11");
-        listForecast.add("Sunday-Rainy-20/12");
-        listForecast.add("Monday-Foggy-17/11");
-        listForecast.add("Tuesday-Cloudy-15/08");
-        listForecast.add("Wednesday-Sunny-16/10");
-        listForecast.add("Thursday-Sunny-12/06");
 
         //Un AdapterView es una vista cuyos hijos están determinados por un adaptador. Cada item de la lista lo adaptaremos a un disenno
         mForecastAdapter =
@@ -100,6 +107,16 @@ public class ForecastFragment extends Fragment {
         ListView view = (ListView) rootView.findViewById(R.id.listview_forecast);
         //Agregar el adaptador al ListView
         view.setAdapter(mForecastAdapter);
+        
+        view.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+               String forecast = mForecastAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -225,6 +242,17 @@ public class ForecastFragment extends Fragment {
          * Prepare the weather high/lows for presentation.
          */
         private String formatHighLows(double high, double low) {
+            
+            SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unitsType = shared.getString(getString(R.string.pref_metrics_key),getString(R.string.pref_metrics_default));
+          
+            if(unitsType.equals(getString(R.string.pref_metrics_imperial))) {
+                high = high * 1.8 + 32;
+                low = low * 1.8 + 32;
+            }
+            else if (!unitsType.equals(getString(R.string.pref_metrics_default)))
+                Log.d(LOG_TAG, "Unit type not found" + unitsType);
+
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);

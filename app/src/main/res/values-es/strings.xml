@@ -6,5 +6,10 @@
     <string name="action_settings">Configuración</string>
     <string name="timeText">i dont know</string>
     <string name="refresh">Refrescar</string>
+    <string name="title_activity_detail">Detalles del día</string>
+    <string name="title_activity_settings">Configuración de la actividad</string>
+    <string name="pref_location_title">Ubicación</string>
+    <string name="pref_metrics_name">Métrica</string>
+    <string name="action_map">Mapa</string>
 
 </resources>
