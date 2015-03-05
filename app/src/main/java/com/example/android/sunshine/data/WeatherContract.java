@@ -39,7 +39,17 @@ public class WeatherContract {
         done for WeatherEntry)
      */
     public static final class LocationEntry implements BaseColumns {
+      
         public static final String TABLE_NAME = "location";
+        
+        //Location settinng send to openweather as the location query
+        public  static final String COLUMN_LOCATION_SETTING = "location_setting";
+        //latitud
+        public  static final String COLUMN_COORD_LAT = "corrd_lat";
+        //longitud
+        public  static final String COLUMN_COORD_LONG = "coord_long";
+        //Nombre de la ciudad
+        public  static final String COLUMN_CITY_NAME = "city_name";
 
     }
 
